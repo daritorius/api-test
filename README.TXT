@@ -6,6 +6,7 @@ Technologies:
     - flask-restful
     - SQLAlchemy
     - fabric
+    - sqlite3
 
 Init project with fabric command: "fab init_virtualenv".
 

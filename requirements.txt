@@ -1,0 +1,5 @@
+flask-restful
+Flask-SQLAlchemy
+SQLAlchemy
+pysqlite
+fabric
