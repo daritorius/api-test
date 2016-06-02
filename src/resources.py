@@ -12,11 +12,6 @@ app = Flask(__name__)
 api = Api(app)
 
 
-# credits_resource_fields = {
-#     'name': fields.String,
-# }
-
-
 credits_resource_fields = {
     'id': fields.String,
     'name': fields.String,
