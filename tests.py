@@ -380,15 +380,11 @@ class ApiTestCase(unittest.TestCase):
         assert response_data['thumbnails'][0]['image_url'] == "https://google.com"
         assert response_data['thumbnails'][1]['image_url'] == "https://yahoo.com"
         assert len(response_data['credits']) == 2
-        assert response_data['credits'][0]['name'] == "Tom Jones"
-        assert response_data['credits'][1]['name'] == "Jessica Alba"
 
         response = self.app.get('/assets/3/credits/')
         assert response.status_code == 200
         response_data = json.loads(response.data)
         assert len(response_data) == 2
-        assert response_data[0]["name"] == "Tom Jones"
-        assert response_data[1]["name"] == "Jessica Alba"
 
         response = self.app.get('/assets/')
         assert response.status_code == 200
@@ -402,8 +398,6 @@ class ApiTestCase(unittest.TestCase):
         assert response_data[2]['thumbnails'][0]['image_url'] == "https://google.com"
         assert response_data[2]['thumbnails'][1]['image_url'] == "https://yahoo.com"
         assert len(response_data[2]['credits']) == 2
-        assert response_data[2]['credits'][0]['name'] == "Tom Jones"
-        assert response_data[2]['credits'][1]['name'] == "Jessica Alba"
 
         response = self.app.delete('/assets/3/')
         assert response.status_code == 201
@@ -429,6 +423,206 @@ class ApiTestCase(unittest.TestCase):
         assert response_data[0]["name"] == "Fozie Bear"
         assert response_data[1]["name"] == "Big Bird"
 
+    # credits list
+
+    def test_credits_list(self):
+        response = self.app.get('/credits')
+        assert response.status_code == 301
+
+        response = self.app.get('/credits/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 3
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Fozie Bear"
+
+        response = self.app.get('/credits/?limit1=1')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/?sort_by1=asc')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/?sort_by=1')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/?sort_by=1&limit=asd')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/?sort_by=asc&limit=1')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "Angry Tiger"
+
+        response = self.app.get('/credits/?sort_by=desc&limit=1')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "Fozie Bear"
+
+        response = self.app.get('/credits/?sort_by=asc&limit=2')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 2
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+
+        response = self.app.get('/credits/?sort_by=asc&limit=-1')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 3
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Fozie Bear"
+
+        response = self.app.get('/credits/?sort_by=desc&limit=-1')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 3
+        assert response_data[0]["name"] == "Fozie Bear"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Angry Tiger"
+
+    def test_credits_create(self):
+        response = self.app.post('/credits/', data={})
+        assert response.status_code == 400
+
+        response = self.app.post('/credits/', data={"name1": "name1"})
+        assert response.status_code == 400
+
+        response = self.app.post('/credits/', data={"name": "name1"})
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 4
+        assert response_data["name"] == "name1"
+
+        response = self.app.get('/credits/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 4
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Fozie Bear"
+        assert response_data[3]["name"] == "name1"
+
+        response = self.app.post('/credits/', data={"name": "name2"})
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 5
+        assert response_data["name"] == "name2"
+
+        response = self.app.get('/credits/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 5
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Fozie Bear"
+        assert response_data[3]["name"] == "name1"
+        assert response_data[4]["name"] == "name2"
+
+    def test_delete_credits(self):
+        response = self.app.delete('/credits/4/')
+        assert response.status_code == 500
+
+        response = self.app.delete('/credits/1/')
+        assert response.status_code == 201
+
+        response = self.app.get('/credits/1/')
+        assert response.status_code == 500
+
+        response = self.app.get('/credits/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 2
+
+    def test_get_credits_item(self):
+        response = self.app.get('/credits/3')
+        assert response.status_code == 301
+
+        response = self.app.get('/credits/4/')
+        assert response.status_code == 500
+
+        response = self.app.get('/credits/4/?sort_by=asc')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/3/?sort_by=asc')
+        assert response.status_code == 400
+
+        response = self.app.get('/credits/1/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 1
+        assert response_data["name"] == "Fozie Bear"
+
+        response = self.app.get('/credits/2/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 2
+        assert response_data["name"] == "Big Bird"
+
+        response = self.app.get('/credits/3/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 3
+        assert response_data["name"] == "Angry Tiger"
+
+    def test_update_credits_item(self):
+        response = self.app.put('/credits/4/', data={'name': 'name1'})
+        assert response.status_code == 500
+
+        response = self.app.put('/credits/1/', data={'name': 'name1'})
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert int(response_data["id"]) == 1
+        assert response_data["name"] == "name1"
+
+        response = self.app.get('/credits/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 3
+        assert int(response_data[0]["id"]) == 3
+        assert int(response_data[1]["id"]) == 2
+        assert int(response_data[2]["id"]) == 1
+        assert response_data[0]["name"] == "Angry Tiger"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "name1"
+
+        response = self.app.get('/credits/?sort_by=desc')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 3
+        assert int(response_data[0]["id"]) == 1
+        assert int(response_data[1]["id"]) == 2
+        assert int(response_data[2]["id"]) == 3
+        assert response_data[0]["name"] == "name1"
+        assert response_data[1]["name"] == "Big Bird"
+        assert response_data[2]["name"] == "Angry Tiger"
+
+    def test_credits_assets_list(self):
+        response = self.app.get('/credits/4/assets/')
+        assert response.status_code == 500
+
+        response = self.app.get('/credits/1/assets')
+        assert response.status_code == 301
+
+        response = self.app.get('/credits/1/assets/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 2
+
+        response = self.app.get('/credits/2/assets/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 2
+
+        response = self.app.get('/credits/3/assets/')
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert len(response_data) == 1
+        assert int(response_data[0]['id']) == 1
+        assert response_data[0]['title'] == 'Wiredrive IOWA: Wiredrive Award Winners 2009'
 
 if __name__ == '__main__':
     unittest.main()
