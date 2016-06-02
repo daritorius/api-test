@@ -44,10 +44,8 @@ class AssetsList(Resource):
     @marshal_with(assets_resource_fields)
     def get(self):
         args = assets_list_parser.parse_args(strict=True)
-        if args.get('limit') is not None:
-            args['limit'] = args['limit'] if args['limit'] > 0 else None
         assets = self.assets_handler.get_assets_list(
-            sort_by=args.get('sort_by'), limit=args['limit'], credits_filter=args.get('credits_filter'))
+            sort_by=args.get('sort_by'), limit=args.get('limit'), credits_filter=args.get('credits_filter'))
         return assets, 200
 
     @marshal_with(assets_resource_fields)
@@ -102,9 +100,7 @@ class CreditsList(Resource):
     @marshal_with(credits_resource_fields)
     def get(self):
         args = credits_list_parser.parse_args(strict=True)
-        if args.get('limit') is not None:
-            args['limit'] = args['limit'] if args['limit'] > 0 else None
-        credits_list = self.credits_handler.get_credits_list(sort_by=args.get('sort_by'), limit=args['limit'])
+        credits_list = self.credits_handler.get_credits_list(sort_by=args.get('sort_by'), limit=args.get('limit'))
         return credits_list, 200
 
     @marshal_with(credits_resource_fields)

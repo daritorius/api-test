@@ -90,14 +90,7 @@ class ApiTestCase(unittest.TestCase):
         assert response_data[0]['created_at'] == "Wed, 01 Jun 2016 00:00:00 -0000"
 
         response = self.app.get('/?limit=-1')
-        assert response.status_code == 200
-        response_data = json.loads(response.data)
-        assert len(response_data) == 2
-        assert int(response_data[0]['id']) == 1
-        assert response_data[0]['title'] == "Wiredrive IOWA: Wiredrive Award Winners 2009"
-        assert response_data[0]['description'] == \
-               "https://iowa.wiredrive.com/present-library-gallery/token/e5d10087fd878ba5dc8ea7857495710b"
-        assert response_data[0]['created_at'] == "Wed, 01 Jun 2016 00:00:00 -0000"
+        assert response.status_code == 400
 
     def test_assets_list_sort_limit(self):
         response = self.app.get('/?limit&sort_by')
@@ -468,21 +461,8 @@ class ApiTestCase(unittest.TestCase):
         assert response_data[0]["name"] == "Angry Tiger"
         assert response_data[1]["name"] == "Big Bird"
 
-        response = self.app.get('/credits/?sort_by=asc&limit=-1')
-        assert response.status_code == 200
-        response_data = json.loads(response.data)
-        assert len(response_data) == 3
-        assert response_data[0]["name"] == "Angry Tiger"
-        assert response_data[1]["name"] == "Big Bird"
-        assert response_data[2]["name"] == "Fozie Bear"
-
         response = self.app.get('/credits/?sort_by=desc&limit=-1')
-        assert response.status_code == 200
-        response_data = json.loads(response.data)
-        assert len(response_data) == 3
-        assert response_data[0]["name"] == "Fozie Bear"
-        assert response_data[1]["name"] == "Big Bird"
-        assert response_data[2]["name"] == "Angry Tiger"
+        assert response.status_code == 400
 
     def test_credits_create(self):
         response = self.app.post('/credits/', data={})
