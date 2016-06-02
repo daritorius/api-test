@@ -1,5 +1,5 @@
 For complete setup of virtualenv:
-    ubuntu/debian: sudo apt-get install libsqlite3-dev
+    ubuntu/debian: sudo apt-get install libsqlite3-dev sqlite3
     macos: brew install sqlite3
 
 Technologies:
@@ -9,6 +9,8 @@ Technologies:
     - sqlite3
 
 Init project with fabric command: "fab init_virtualenv".
+
+Activate virtualenv: "source .env/api/bin/active" from parent directory.
 
 Start project: "python start.py" from parent directory.
 
